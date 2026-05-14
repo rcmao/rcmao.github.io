@@ -69,6 +69,17 @@ a:hover {
   isolation: isolate;
 }
 
+/* Retro page stretches past viewport; let the document scroll (body clips if overflow:hidden). */
+.app-shell:has(.stage-retro) {
+  overflow: visible;
+}
+
+body:has(.stage-retro) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .dream-sky {
   position: fixed;
   inset: 0;
@@ -1284,7 +1295,7 @@ a:hover {
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.48), transparent 22%),
     radial-gradient(circle at 82% 28%, rgba(126, 232, 255, 0.5), transparent 24%),
     linear-gradient(180deg, #78bde9 0%, #2177bd 48%, #74ae32 49%, #4f8a20 100%);
-  overflow: auto;
+  overflow: visible;
   font-family: var(--font-ui-retro);
 }
 
@@ -1333,6 +1344,11 @@ a:hover {
   min-width: 280px;
   max-width: 100%;
   backdrop-filter: blur(18px);
+}
+
+.retro-window--touch .window-titlebar {
+  cursor: default;
+  touch-action: pan-y;
 }
 
 .window-titlebar {
@@ -1557,7 +1573,10 @@ a:hover {
   .retro-topbar {
     align-items: stretch;
     flex-direction: column;
-    position: absolute;
+    position: sticky;
+    top: 10px;
+    z-index: 12;
+    margin-bottom: 8px;
   }
 
   .windows-layout {
@@ -1571,8 +1590,14 @@ a:hover {
   }
 
   .retro-window {
-    resize: vertical;
+    resize: none;
+    overflow: visible;
+    touch-action: pan-y;
     transform: none !important;
+  }
+
+  .retro-window .window-body {
+    touch-action: pan-y;
   }
 
   .publication-card {
