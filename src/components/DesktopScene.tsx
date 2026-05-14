@@ -5,6 +5,7 @@ import { ACESFilmicToneMapping, BackSide, Box3, Color, Group, Vector3 } from "th
 import { playAquariumBubbleSound } from "../audio/bubblePop";
 import { playWin7NavigationClick } from "../audio/win7Click";
 import { pickRandomAquariumLine } from "../data/aquariumBubbles";
+import { publicAssetUrl } from "../lib/publicAssetUrl";
 
 type DesktopSceneProps = {
   onEnterRetro: () => void;
@@ -200,7 +201,7 @@ function Computer({
         <boxGeometry args={[0.82, 0.8, 0.7]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path="/models/imac_g3.glb" targetSize={0.82} rotation={[0, Math.PI, 0]} />
+      <NormalizedModel path={publicAssetUrl("/models/imac_g3.glb")} targetSize={0.82} rotation={[0, Math.PI, 0]} />
     </group>
   );
 }
@@ -245,14 +246,14 @@ function CdPlayer({
         <boxGeometry args={[0.28, 0.17, 0.26]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path="/models/ipod_nano.glb" targetSize={0.28} rotation={[Math.PI / 2, 0, Math.PI / 2]} />
+      <NormalizedModel path={publicAssetUrl("/models/ipod_nano.glb")} targetSize={0.28} rotation={[Math.PI / 2, 0, Math.PI / 2]} />
     </group>
   );
 }
 
-useGLTF.preload("/models/imac_g3.glb");
-useGLTF.preload("/models/ipod_nano.glb");
-useGLTF.preload("/models/aquariumtank.glb");
+useGLTF.preload(publicAssetUrl("/models/imac_g3.glb"));
+useGLTF.preload(publicAssetUrl("/models/ipod_nano.glb"));
+useGLTF.preload(publicAssetUrl("/models/aquariumtank.glb"));
 
 function Aquarium({
   transform,
@@ -304,7 +305,7 @@ function Aquarium({
         <boxGeometry args={[0.4, 0.42, 0.38]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path="/models/aquariumtank.glb" targetSize={0.46} rotation={[0, 0, 0]} />
+      <NormalizedModel path={publicAssetUrl("/models/aquariumtank.glb")} targetSize={0.46} rotation={[0, 0, 0]} />
     </group>
   );
 }

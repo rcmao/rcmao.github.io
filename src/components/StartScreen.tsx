@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { publicAssetUrl } from "../lib/publicAssetUrl";
 type StartScreenProps = {
   onStart: () => void;
 };
@@ -91,7 +92,7 @@ function StartScreen({ onStart }: StartScreenProps) {
           <span className="tiny-house" />
         </div>
         <div className="win7-login-card">
-          <img src="/start-avatar.png" alt="" />
+          <img src={publicAssetUrl("/start-avatar.png")} alt="" />
           <p className="start-copy">Welcome to Ruochen's Virtual Lab</p>
           <div className="win7-password-row">
             <button type="button" className="win7-start-field" onClick={handleStart}>
