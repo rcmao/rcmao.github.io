@@ -138,74 +138,78 @@ function DeskMusicPanel({ open, onClose, audioRef }: DeskMusicPanelProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <header className="desk-music-panel-header">
-              <h2 className="desk-music-album-title">{current.title}</h2>
-              <p className="desk-music-album-artist">{current.artist}</p>
+              <div className="desk-music-panel-titleblock">
+                <h2 className="desk-music-album-title">{current.title}</h2>
+                <p className="desk-music-album-artist">{current.artist}</p>
+              </div>
               <button type="button" className="desk-music-close" onClick={onClose} aria-label="Close player">
                 ×
               </button>
             </header>
 
-            <div className="desk-music-carousel" aria-hidden="true">
-              {([-1, 0, 1] as const).map((offset) => {
-                const track = coverForOffset(offset);
-                return (
-                  <div key={offset} className={coverCardClass(offset)}>
-                    <img src={track.coverSrc} alt="" width={220} height={220} draggable={false} />
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="desk-music-now-nav">
-              <button
-                type="button"
-                className="desk-music-arrow"
-                aria-label="Previous track"
-                onClick={() => setFocusIndex((i) => (i - 1 + n) % n)}
-              >
-                ‹
-              </button>
-              <div className="desk-music-now-text">
-                <span className="desk-music-track-title">{current.title}</span>
-                <span className="desk-music-track-meta">{current.artist}</span>
+            <div className="desk-music-panel-body">
+              <div className="desk-music-carousel" aria-hidden="true">
+                {([-1, 0, 1] as const).map((offset) => {
+                  const track = coverForOffset(offset);
+                  return (
+                    <div key={offset} className={coverCardClass(offset)}>
+                      <img src={track.coverSrc} alt="" width={220} height={220} draggable={false} />
+                    </div>
+                  );
+                })}
               </div>
-              <button
-                type="button"
-                className="desk-music-arrow"
-                aria-label="Next track"
-                onClick={() => setFocusIndex((i) => (i + 1) % n)}
-              >
-                ›
-              </button>
+
+              <div className="desk-music-now-nav">
+                <button
+                  type="button"
+                  className="desk-music-arrow"
+                  aria-label="Previous track"
+                  onClick={() => setFocusIndex((i) => (i - 1 + n) % n)}
+                >
+                  ‹
+                </button>
+                <div className="desk-music-now-text">
+                  <span className="desk-music-track-title">{current.title}</span>
+                  <span className="desk-music-track-meta">{current.artist}</span>
+                </div>
+                <button
+                  type="button"
+                  className="desk-music-arrow"
+                  aria-label="Next track"
+                  onClick={() => setFocusIndex((i) => (i + 1) % n)}
+                >
+                  ›
+                </button>
+              </div>
+
+              <ul className="desk-music-tracklist">
+                {DESK_PLAYLIST.map((track, index) => {
+                  const isActiveRow = index === safeFocus;
+                  const isPlayingThis = isActiveRow && playing;
+                  const displayDur =
+                    isActiveRow && durationSec > 0 ? formatTime(durationSec) : "—:—";
+
+                  return (
+                    <li key={track.id}>
+                      <button
+                        type="button"
+                        className={`desk-music-row ${isActiveRow ? "is-active" : ""}`}
+                        onClick={() => void togglePlay(index)}
+                      >
+                        <span className="desk-music-row-play" aria-hidden="true">
+                          {isPlayingThis ? "⏸" : "▶"}
+                        </span>
+                        <span className="desk-music-row-info">
+                          <span className="desk-music-row-title">{track.title}</span>
+                          <span className="desk-music-row-artist">{track.artist}</span>
+                        </span>
+                        <span className="desk-music-row-dur">{displayDur}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-
-            <ul className="desk-music-tracklist">
-              {DESK_PLAYLIST.map((track, index) => {
-                const isActiveRow = index === safeFocus;
-                const isPlayingThis = isActiveRow && playing;
-                const displayDur =
-                  isActiveRow && durationSec > 0 ? formatTime(durationSec) : "—:—";
-
-                return (
-                  <li key={track.id}>
-                    <button
-                      type="button"
-                      className={`desk-music-row ${isActiveRow ? "is-active" : ""}`}
-                      onClick={() => void togglePlay(index)}
-                    >
-                      <span className="desk-music-row-play" aria-hidden="true">
-                        {isPlayingThis ? "⏸" : "▶"}
-                      </span>
-                      <span className="desk-music-row-info">
-                        <span className="desk-music-row-title">{track.title}</span>
-                        <span className="desk-music-row-artist">{track.artist}</span>
-                      </span>
-                      <span className="desk-music-row-dur">{displayDur}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
           </motion.div>
         </motion.div>
       )}

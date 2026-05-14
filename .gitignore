@@ -5,3 +5,6 @@ dist
 .env
 .env.*
 !.env.example
+
+# Local / hi-res GLB working copies; site ships `public/models/` only
+3d_model/
