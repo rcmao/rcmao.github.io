@@ -11,9 +11,11 @@ permissions:
   pages: write
   id-token: write
 
+# If cancel-in-progress is true, rapid pushes cancel an in-flight deploy and GitHub
+# reports deploy failure (“higher priority waiting request for pages exists”).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
