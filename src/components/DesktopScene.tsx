@@ -251,10 +251,6 @@ function CdPlayer({
   );
 }
 
-useGLTF.preload(publicAssetUrl("/models/imac_g3.glb"));
-useGLTF.preload(publicAssetUrl("/models/ipod_nano.glb"));
-useGLTF.preload(publicAssetUrl("/models/aquariumtank.glb"));
-
 function Aquarium({
   transform,
   isActive,

@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BootSequence from "./components/BootSequence";
 import DeskMusicPanel from "./components/DeskMusicPanel";
-import DesktopScene from "./components/DesktopScene";
 import Preloader from "./components/Preloader";
 import StartScreen from "./components/StartScreen";
 import { DESK_PLAYLIST } from "./data/deskPlaylist";
@@ -10,6 +9,7 @@ import { deskNotes, publications, type Publication } from "./data/site";
 
 type Stage = "start" | "preload" | "boot" | "desktop" | "retro";
 
+const DesktopScene = lazy(() => import("./components/DesktopScene"));
 const RetroDesktop = lazy(() => import("./components/RetroDesktop"));
 
 function App() {
@@ -110,12 +110,20 @@ function App() {
             key="desktop"
             className="stage stage-desktop"
           >
-            <DesktopScene
-              onEnterRetro={() => setStage("retro")}
-              onOpenMusicPlayer={() => setMusicPanelOpen(true)}
-              onOpenBook={() => showPublication(firstPublication)}
-              onShowNote={() => setModal({ title: "QQ Pet Memo", body: randomDeskNote })}
-            />
+            <Suspense
+              fallback={
+                <div className="canvas-shell canvas-shell-loading" aria-busy="true">
+                  <p className="begin-hint is-ready">Loading 3D desk…</p>
+                </div>
+              }
+            >
+              <DesktopScene
+                onEnterRetro={() => setStage("retro")}
+                onOpenMusicPlayer={() => setMusicPanelOpen(true)}
+                onOpenBook={() => showPublication(firstPublication)}
+                onShowNote={() => setModal({ title: "QQ Pet Memo", body: randomDeskNote })}
+              />
+            </Suspense>
           </section>
         )}
         {stage === "retro" && (

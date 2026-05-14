@@ -705,6 +705,13 @@ a:hover {
   height: 100vh;
 }
 
+.canvas-shell-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f1ec;
+}
+
 .visually-hidden-desk-audio {
   position: fixed;
   left: -9999px;
