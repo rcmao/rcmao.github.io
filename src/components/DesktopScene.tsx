@@ -82,6 +82,13 @@ const shibaLayout: TransformValue = {
   scale: 1,
 };
 
+const SHIBA_GLB_PATH = "/models/shiba_inu_texture_updated.glb";
+/**
+ * Normalized max dimension in scene units. Values like 0.013 are ~0.25% of the 5u-wide desk —
+ * invisible on most screens / GitHub Pages while the Html label still shows.
+ */
+const SHIBA_TARGET_SIZE = 0.068;
+
 function cloneItemTransform(value: TransformValue): TransformValue {
   return {
     position: [...value.position],
@@ -485,7 +492,7 @@ function ShibaModel({ targetSize }: { targetSize: number }) {
   return (
     <Suspense fallback={null}>
       <NormalizedSkinnedModel
-        path={publicAssetUrl("/models/shiba_inu_texture_updated.glb")}
+        path={publicAssetUrl(SHIBA_GLB_PATH)}
         targetSize={targetSize}
         rotation={[0, 0, 0]}
       />
@@ -585,7 +592,7 @@ function ChaichaiDog({ isActive, onHoverChange }: ChaichaiDogProps) {
         }}
       >
         <group ref={wagRef}>
-          <ShibaModel targetSize={0.013} />
+          <ShibaModel targetSize={SHIBA_TARGET_SIZE} />
         </group>
         <Html position={[0, 0.28, 0]} center distanceFactor={8.4} style={{ pointerEvents: "none" }}>
           <div className="chaichai-hotspot-stack" style={{ pointerEvents: dialogOpen ? "auto" : "none" }}>
@@ -831,6 +838,10 @@ function DesktopScene({
   const [aquariumModelReady, setAquariumModelReady] = useState(!deskLite);
   /** Defer the large Shiba GLB on mobile so smaller desk models can load & render first. */
   const [chaichaiModelReady, setChaichaiModelReady] = useState(!deskLite);
+
+  useEffect(() => {
+    void useGLTF.preload(publicAssetUrl(SHIBA_GLB_PATH));
+  }, []);
 
   useEffect(() => {
     if (!deskLite) {
