@@ -120,7 +120,7 @@ function NormalizedModel({
   targetSize: number;
   rotation?: [number, number, number];
 }) {
-  const { scene } = useGLTF(path);
+  const { scene } = useGLTF(path, false, true);
 
   const scaledRoot = useMemo(() => {
     const model = scene.clone(true);
