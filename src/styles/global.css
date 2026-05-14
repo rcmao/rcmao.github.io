@@ -1567,7 +1567,7 @@ body:has(.stage-retro) {
   }
 
   .retro-desktop {
-    padding: 88px 16px 24px;
+    padding: 80px 10px 20px;
   }
 
   .retro-topbar {
@@ -1581,6 +1581,10 @@ body:has(.stage-retro) {
 
   .windows-layout {
     grid-template-columns: 1fr;
+    gap: 14px;
+    justify-items: center;
+    min-height: 0;
+    touch-action: pan-y;
   }
 
   .profile-window,
@@ -1594,14 +1598,69 @@ body:has(.stage-retro) {
     overflow: visible;
     touch-action: pan-y;
     transform: none !important;
+    width: min(308px, 86vw);
+    min-width: 0;
+    max-width: 100%;
+    box-shadow:
+      0 12px 32px rgba(6, 42, 88, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  }
+
+  .retro-window .window-titlebar {
+    min-height: 30px;
+    padding: 3px 6px 3px 10px;
+    font-size: 0.8rem;
+    touch-action: pan-y;
   }
 
   .retro-window .window-body {
     touch-action: pan-y;
+    padding: 11px 12px 13px;
+    font-size: 0.9rem;
+    line-height: 1.52;
+  }
+
+  .profile-window h1 {
+    margin: 10px 0 4px;
+    font-size: clamp(1.45rem, 5.8vw, 1.95rem);
+  }
+
+  .social-row {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .social-row a {
+    padding: 5px 8px;
+    font-size: 0.86rem;
+  }
+
+  .focus-text {
+    padding: 8px;
+    font-size: 0.88rem;
+  }
+
+  .about-window,
+  .publications-window {
+    min-height: auto;
+  }
+
+  .publication-grid {
+    gap: 11px;
   }
 
   .publication-card {
     grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .publication-card img {
+    height: 82px;
+  }
+
+  .publication-card h2 {
+    font-size: 1.01rem;
   }
 }
 
