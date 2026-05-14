@@ -113,7 +113,7 @@ function App() {
             <Suspense
               fallback={
                 <div className="canvas-shell canvas-shell-loading" aria-busy="true">
-                  <p className="begin-hint is-ready">正在加载 3D 桌面脚本…</p>
+                  <p className="begin-hint is-ready">Loading 3D desk…</p>
                 </div>
               }
             >

@@ -345,7 +345,7 @@ function DesktopAssetLoadingOverlay() {
       aria-live="polite"
     >
       <p className="desktop-scene-loading-title">
-        {hasErrors ? "资源加载遇到问题" : "正在加载场景与模型"}
+        {hasErrors ? "Couldn't load assets" : "Loading scene & models"}
       </p>
       <div className="desktop-scene-loading-track" aria-hidden="true">
         <div className="desktop-scene-loading-bar" style={{ transform: `scaleX(${pct / 100})` }} />
@@ -353,11 +353,11 @@ function DesktopAssetLoadingOverlay() {
       <span className="desktop-scene-loading-pct">{hasErrors ? "—" : `${pct}%`}</span>
       {slowHintVisible && !hasErrors ? (
         <p className="desktop-scene-loading-slow">
-          若等待较久仍未完成，多半是网络较慢；可耐心等一会儿或刷新页面再试。
+          Taking a while? Your connection may be slow—give it time or refresh the page.
         </p>
       ) : null}
       {hasErrors ? (
-        <p className="desktop-scene-loading-err">{`部分内容未能加载（${errors.length} 项），请稍后刷新重试。`}</p>
+        <p className="desktop-scene-loading-err">{`${errors.length} asset(s) failed to load. Refresh and try again.`}</p>
       ) : null}
     </div>
   );
