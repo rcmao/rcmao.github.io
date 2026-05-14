@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { ContactShadows, Environment, Html, OrbitControls, useGLTF } from "@react-three/drei";
+import { ContactShadows, Environment, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { ACESFilmicToneMapping, BackSide, Box3, Color, Group, Vector3 } from "three";
 import { playAquariumBubbleSound } from "../audio/bubblePop";
@@ -306,6 +306,63 @@ function Aquarium({
   );
 }
 
+/** Tracks drei/three queued loads so large GLBs stay behind a readable overlay until done (or stalled). */
+function DesktopAssetLoadingOverlay() {
+  const { active, progress, errors } = useProgress();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    let fadeOutTimer: ReturnType<typeof window.setTimeout>;
+    if (active) {
+      setMounted(true);
+    } else {
+      fadeOutTimer = window.setTimeout(() => setMounted(false), 380);
+    }
+    return () => window.clearTimeout(fadeOutTimer);
+  }, [active]);
+
+  const [slowHintVisible, setSlowHintVisible] = useState(false);
+  useEffect(() => {
+    if (!active) {
+      setSlowHintVisible(false);
+      return;
+    }
+    const slowTimer = window.setTimeout(() => setSlowHintVisible(true), 22_000);
+    return () => window.clearTimeout(slowTimer);
+  }, [active]);
+
+  if (!mounted) {
+    return null;
+  }
+
+  const pct = Math.min(100, Math.max(0, Math.round(progress)));
+  const hasErrors = errors.length > 0;
+
+  return (
+    <div
+      className={`desktop-scene-loading${active ? "" : " desktop-scene-loading--leaving"}`}
+      aria-busy={active}
+      aria-live="polite"
+    >
+      <p className="desktop-scene-loading-title">
+        {hasErrors ? "资源加载遇到问题" : "正在加载场景与模型"}
+      </p>
+      <div className="desktop-scene-loading-track" aria-hidden="true">
+        <div className="desktop-scene-loading-bar" style={{ transform: `scaleX(${pct / 100})` }} />
+      </div>
+      <span className="desktop-scene-loading-pct">{hasErrors ? "—" : `${pct}%`}</span>
+      {slowHintVisible && !hasErrors ? (
+        <p className="desktop-scene-loading-slow">
+          若等待较久仍未完成，多半是网络较慢；可耐心等一会儿或刷新页面再试。
+        </p>
+      ) : null}
+      {hasErrors ? (
+        <p className="desktop-scene-loading-err">{`部分内容未能加载（${errors.length} 项），请稍后刷新重试。`}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function Desk() {
   return (
     <group position={[0, -0.12, 0]}>
@@ -436,6 +493,8 @@ function DesktopScene({
 
         <ContactShadows opacity={0.14} scale={7.5} blur={5} far={5} position={[0, -1.02, 0]} />
       </Canvas>
+
+      <DesktopAssetLoadingOverlay />
 
       <div className="begin-hint is-ready">Drag to rotate · Scroll to zoom</div>
     </div>
