@@ -254,8 +254,16 @@ function NormalizedSkinnedModel({
     const model = SkeletonUtils.clone(scene);
     model.traverse((object) => {
       if ("isMesh" in object) {
-        object.castShadow = true;
-        object.receiveShadow = true;
+        const mesh = object as Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        /** Skinned rigs often have stale/incorrect bounds on mobile; wrong culling hides the whole dog. */
+        mesh.frustumCulled = false;
+        const geom = mesh.geometry;
+        if (geom) {
+          geom.computeBoundingBox();
+          geom.computeBoundingSphere();
+        }
       }
     });
 
@@ -267,7 +275,14 @@ function NormalizedSkinnedModel({
     holder.add(model);
 
     if (!box || box.isEmpty()) {
-      holder.scale.setScalar(targetSize * 0.03);
+      let maxDimension = Math.max(geomFallbackMaxDim(model), 1e-4);
+      holder.scale.setScalar(targetSize / maxDimension);
+      holder.updateMatrixWorld(true);
+      const placed = unionGeometryWorldBox(holder);
+      if (placed && !placed.isEmpty()) {
+        const minY = placed.min.y;
+        model.position.y -= minY / holder.scale.x;
+      }
       return holder;
     }
 
@@ -833,8 +848,6 @@ function DesktopScene({
   const layout = useMemo(() => cloneSceneLayout(defaultLayout), []);
   const [hoverTarget, setHoverTarget] = useState<HoverTarget>(null);
   const [aquariumModelReady, setAquariumModelReady] = useState(!deskLite);
-  /** Defer the large Shiba GLB on mobile so smaller desk models can load & render first. */
-  const [chaichaiModelReady, setChaichaiModelReady] = useState(!deskLite);
 
   useEffect(() => {
     void useGLTF.preload(publicAssetUrl(SHIBA_GLB_PATH));
@@ -847,16 +860,6 @@ function DesktopScene({
     }
     setAquariumModelReady(false);
     const t = window.setTimeout(() => setAquariumModelReady(true), 550);
-    return () => window.clearTimeout(t);
-  }, [deskLite]);
-
-  useEffect(() => {
-    if (!deskLite) {
-      setChaichaiModelReady(true);
-      return;
-    }
-    setChaichaiModelReady(false);
-    const t = window.setTimeout(() => setChaichaiModelReady(true), 1100);
     return () => window.clearTimeout(t);
   }, [deskLite]);
 
@@ -961,12 +964,10 @@ function DesktopScene({
             modelReady={aquariumModelReady}
             largeTapTarget={deskLite}
           />
-          {chaichaiModelReady ? (
-            <ChaichaiDog
-              isActive={hoverTarget === "chaichai"}
-              onHoverChange={(hovering) => setHoverTarget(hovering ? "chaichai" : null)}
-            />
-          ) : null}
+          <ChaichaiDog
+            isActive={hoverTarget === "chaichai"}
+            onHoverChange={(hovering) => setHoverTarget(hovering ? "chaichai" : null)}
+          />
         </group>
 
       </Canvas>
