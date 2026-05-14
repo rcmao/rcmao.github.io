@@ -2,7 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, Suspense, type ReactNode } from "react";
 import { ACESFilmicToneMapping, BackSide, Box3, Color, Group, Object3D, Vector3 } from "three";
-import type { Mesh, SkinnedMesh } from "three";
+import type { Mesh } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { SkeletonUtils } from "three-stdlib";
 import { playAquariumBubbleSound } from "../audio/bubblePop";
@@ -238,34 +238,6 @@ function unionGeometryWorldBox(root: Object3D): Box3 | null {
   return has ? acc : null;
 }
 
-/**
- * High–bone-count rigs (this Shiba has ~120 joints) rely on GPU bone textures; some mobile GPUs /
- * WebGL stacks never show the mesh unless textures are (re)built after clone + world update.
- */
-function refreshSkinnedBoneTextures(root: Object3D): void {
-  root.updateMatrixWorld(true);
-  root.traverse((object) => {
-    const sm = object as SkinnedMesh;
-    if (!sm.isSkinnedMesh) {
-      return;
-    }
-    sm.frustumCulled = false;
-    sm.skeleton.computeBoneTexture();
-    const boneTex = sm.skeleton.boneTexture;
-    if (boneTex) {
-      boneTex.needsUpdate = true;
-    }
-    sm.skeleton.update();
-    const mats = sm.material;
-    const list = Array.isArray(mats) ? mats : [mats];
-    for (const m of list) {
-      if (m) {
-        m.needsUpdate = true;
-      }
-    }
-  });
-}
-
 /** Like NormalizedModel but clones rigged GLTFs correctly (SkinnedMesh / skeleton). */
 function NormalizedSkinnedModel({
   path,
@@ -311,7 +283,6 @@ function NormalizedSkinnedModel({
         const minY = placed.min.y;
         model.position.y -= minY / holder.scale.x;
       }
-      refreshSkinnedBoneTextures(holder);
       return holder;
     }
 
@@ -332,7 +303,6 @@ function NormalizedSkinnedModel({
       model.position.y -= minY / holder.scale.x;
     }
 
-    refreshSkinnedBoneTextures(holder);
     return holder;
   }, [scene, targetSize]);
 
@@ -927,10 +897,10 @@ function DesktopScene({
         style={{ display: "block", width: "100%", height: "100%" }}
         gl={{
           antialias: !deskLite,
-          alpha: deskLite,
+          alpha: false,
           toneMapping: ACESFilmicToneMapping,
           toneMappingExposure: 1.02,
-          powerPreference: deskLite ? "default" : "high-performance",
+          powerPreference: deskLite ? "low-power" : "high-performance",
           failIfMajorPerformanceCaveat: false,
         }}
         onCreated={() => {
