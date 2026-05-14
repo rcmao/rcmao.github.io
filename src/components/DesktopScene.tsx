@@ -292,13 +292,17 @@ function Aquarium({
   isActive,
   onHoverChange,
   modelReady,
+  largeTapTarget,
 }: {
   transform: TransformValue;
   isActive: boolean;
   onHoverChange: (isHovering: boolean) => void;
   modelReady: boolean;
+  largeTapTarget: boolean;
 }) {
   const [bubbleLine, setBubbleLine] = useState<string | null>(null);
+
+  const hitDims = largeTapTarget ? ([0.56, 0.58, 0.54] as const) : ([0.4, 0.42, 0.38] as const);
 
   useEffect(() => {
     if (isActive) {
@@ -312,38 +316,46 @@ function Aquarium({
 
   return (
     <group position={transform.position} rotation={transform.rotation} scale={transform.scale}>
-      <Html position={[0, 0.48, 0]} center distanceFactor={4.6} style={{ pointerEvents: "none" }}>
-        <div className="aquarium-hotspot-stack">
-          <span className={`scene-hotspot-hint ${isActive ? "is-active" : ""}`}>Aquarium</span>
-          {bubbleLine ? (
-            <div className={`scene-comic-bubble ${isActive ? "is-open" : "is-closing"}`}>
-              <div className="scene-comic-bubble-inner">
-                <span className="scene-comic-bubble-fish" aria-hidden>
-                  🐠
-                </span>
-                <p className="scene-comic-bubble-text">{bubbleLine}</p>
-              </div>
-              <div className="scene-comic-bubble-tail" aria-hidden />
-            </div>
-          ) : null}
-        </div>
-      </Html>
-      <mesh
-        position={[0, 0.14, 0]}
+      <group
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          onHoverChange(true);
+        }}
         onPointerOver={(event) => {
           event.stopPropagation();
           onHoverChange(true);
         }}
-        onPointerOut={() => onHoverChange(false)}
+        onPointerOut={(event) => {
+          event.stopPropagation();
+          onHoverChange(false);
+        }}
       >
-        <boxGeometry args={[0.4, 0.42, 0.38]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-      {modelReady ? (
-        <Suspense fallback={null}>
-          <NormalizedModel path={publicAssetUrl("/models/aquariumtank.glb")} targetSize={0.46} rotation={[0, 0, 0]} />
-        </Suspense>
-      ) : null}
+        <Html position={[0, 0.48, 0]} center distanceFactor={4.6} style={{ pointerEvents: "none" }}>
+          <div className="aquarium-hotspot-stack">
+            <span className={`scene-hotspot-hint ${isActive ? "is-active" : ""}`}>Aquarium</span>
+            {bubbleLine ? (
+              <div className={`scene-comic-bubble ${isActive ? "is-open" : "is-closing"}`}>
+                <div className="scene-comic-bubble-inner">
+                  <span className="scene-comic-bubble-fish" aria-hidden>
+                    🐠
+                  </span>
+                  <p className="scene-comic-bubble-text">{bubbleLine}</p>
+                </div>
+                <div className="scene-comic-bubble-tail" aria-hidden />
+              </div>
+            ) : null}
+          </div>
+        </Html>
+        <mesh position={[0, 0.14, 0]}>
+          <boxGeometry args={[...hitDims]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+        {modelReady ? (
+          <Suspense fallback={null}>
+            <NormalizedModel path={publicAssetUrl("/models/aquariumtank.glb")} targetSize={0.46} rotation={[0, 0, 0]} />
+          </Suspense>
+        ) : null}
+      </group>
     </group>
   );
 }
@@ -561,6 +573,7 @@ function DesktopScene({
             isActive={hoverTarget === "aquarium"}
             onHoverChange={(isHovering) => setHoverTarget(isHovering ? "aquarium" : null)}
             modelReady={aquariumModelReady}
+            largeTapTarget={deskLite}
           />
         </group>
 
