@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
+import { Html, OrbitControls, useGLTF, useProgress } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, Suspense, type ReactNode } from "react";
 import { ACESFilmicToneMapping, BackSide, Box3, Color, Group, Object3D, Vector3 } from "three";
 import type { Mesh } from "three";
@@ -961,7 +961,6 @@ function DesktopScene({
           ) : null}
         </group>
 
-        {!deskLite ? <ContactShadows opacity={0.14} scale={10.2} blur={5} far={5} position={[0, -1.02, 0]} /> : null}
       </Canvas>
 
       <DesktopAssetLoadingOverlay lite={deskLite} />
