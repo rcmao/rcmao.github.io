@@ -7,6 +7,34 @@ import { playWin7NavigationClick } from "../audio/win7Click";
 import { pickRandomAquariumLine } from "../data/aquariumBubbles";
 import { publicAssetUrl } from "../lib/publicAssetUrl";
 
+function usePreferDeskLite(): boolean {
+  const compute = (): boolean => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    const w = window.innerWidth;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    return w <= 900 || (coarsePointer && w <= 1200);
+  };
+
+  const [deskLite, setDeskLite] = useState<boolean>(compute);
+
+  useEffect(() => {
+    const onResize = (): void => {
+      setDeskLite(compute());
+    };
+    window.addEventListener("resize", onResize);
+    const mq = window.matchMedia("(pointer: coarse)");
+    mq.addEventListener("change", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      mq.removeEventListener("change", onResize);
+    };
+  }, []);
+
+  return deskLite;
+}
+
 type DesktopSceneProps = {
   onEnterRetro: () => void;
   onOpenMusicPlayer: () => void;
@@ -59,7 +87,7 @@ function cloneSceneLayout(layout: SceneLayout): SceneLayout {
 }
 
 /** Soft white-forward studio room gradient + whisper Frutiger aqua on “walls”. */
-function FrutigerRoomBackdrop() {
+function FrutigerRoomBackdrop({ dense }: { dense: boolean }) {
   const uniforms = useMemo(
     () => ({
       uTop: { value: new Color("#ffffff") },
@@ -97,9 +125,13 @@ function FrutigerRoomBackdrop() {
     }
   `;
 
+  const radius = 72;
+  const widthSegments = dense ? 64 : 32;
+  const heightSegments = dense ? 48 : 24;
+
   return (
     <mesh frustumCulled={false} renderOrder={-1000}>
-      <sphereGeometry args={[72, 64, 48]} />
+      <sphereGeometry args={[radius, widthSegments, heightSegments]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={vertexShader}
@@ -201,7 +233,9 @@ function Computer({
         <boxGeometry args={[0.82, 0.8, 0.7]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path={publicAssetUrl("/models/imac_g3.glb")} targetSize={0.82} rotation={[0, Math.PI, 0]} />
+      <Suspense fallback={null}>
+        <NormalizedModel path={publicAssetUrl("/models/imac_g3.glb")} targetSize={0.82} rotation={[0, Math.PI, 0]} />
+      </Suspense>
     </group>
   );
 }
@@ -246,7 +280,9 @@ function CdPlayer({
         <boxGeometry args={[0.28, 0.17, 0.26]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path={publicAssetUrl("/models/ipod_nano.glb")} targetSize={0.28} rotation={[Math.PI / 2, 0, Math.PI / 2]} />
+      <Suspense fallback={null}>
+        <NormalizedModel path={publicAssetUrl("/models/ipod_nano.glb")} targetSize={0.28} rotation={[Math.PI / 2, 0, Math.PI / 2]} />
+      </Suspense>
     </group>
   );
 }
@@ -255,10 +291,12 @@ function Aquarium({
   transform,
   isActive,
   onHoverChange,
+  modelReady,
 }: {
   transform: TransformValue;
   isActive: boolean;
   onHoverChange: (isHovering: boolean) => void;
+  modelReady: boolean;
 }) {
   const [bubbleLine, setBubbleLine] = useState<string | null>(null);
 
@@ -301,7 +339,11 @@ function Aquarium({
         <boxGeometry args={[0.4, 0.42, 0.38]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <NormalizedModel path={publicAssetUrl("/models/aquariumtank.glb")} targetSize={0.46} rotation={[0, 0, 0]} />
+      {modelReady ? (
+        <Suspense fallback={null}>
+          <NormalizedModel path={publicAssetUrl("/models/aquariumtank.glb")} targetSize={0.46} rotation={[0, 0, 0]} />
+        </Suspense>
+      ) : null}
     </group>
   );
 }
@@ -363,22 +405,32 @@ function DesktopAssetLoadingOverlay() {
   );
 }
 
-function Desk() {
+function Desk({ lite }: { lite: boolean }) {
   return (
     <group position={[0, -0.12, 0]}>
-      <mesh receiveShadow castShadow>
+      <mesh receiveShadow castShadow={!lite}>
         <boxGeometry args={[4.05, 0.12, 1.9]} />
-        <meshPhysicalMaterial
-          color="#eef9ff"
-          roughness={0.26}
-          metalness={0.02}
-          transmission={0.18}
-          thickness={0.28}
-          transparent
-          opacity={0.86}
-          clearcoat={0.62}
-          clearcoatRoughness={0.28}
-        />
+        {lite ? (
+          <meshStandardMaterial
+            color="#f0fbff"
+            roughness={0.35}
+            metalness={0.06}
+            transparent
+            opacity={0.9}
+          />
+        ) : (
+          <meshPhysicalMaterial
+            color="#eef9ff"
+            roughness={0.26}
+            metalness={0.02}
+            transmission={0.18}
+            thickness={0.28}
+            transparent
+            opacity={0.86}
+            clearcoat={0.62}
+            clearcoatRoughness={0.28}
+          />
+        )}
       </mesh>
       {[
         [-1.82, -0.68, -0.82],
@@ -386,7 +438,7 @@ function Desk() {
         [-1.82, -0.68, 0.82],
         [1.82, -0.68, 0.82],
       ].map(([x, y, z]) => (
-        <mesh key={`${x}-${z}`} castShadow position={[x, y, z]}>
+        <mesh key={`${x}-${z}`} castShadow={!lite} position={[x, y, z]}>
           <boxGeometry args={[0.08, 1.2, 0.08]} />
           <meshStandardMaterial color="#e7f5fb" roughness={0.34} metalness={0.08} />
         </mesh>
@@ -399,8 +451,20 @@ function DesktopScene({
   onEnterRetro,
   onOpenMusicPlayer,
 }: DesktopSceneProps) {
+  const deskLite = usePreferDeskLite();
   const layout = useMemo(() => cloneSceneLayout(defaultLayout), []);
   const [hoverTarget, setHoverTarget] = useState<HoverTarget>(null);
+  const [aquariumModelReady, setAquariumModelReady] = useState(!deskLite);
+
+  useEffect(() => {
+    if (!deskLite) {
+      setAquariumModelReady(true);
+      return;
+    }
+    setAquariumModelReady(false);
+    const t = window.setTimeout(() => setAquariumModelReady(true), 550);
+    return () => window.clearTimeout(t);
+  }, [deskLite]);
 
   const canvasShellRef = useRef<HTMLDivElement>(null);
 
@@ -431,12 +495,16 @@ function DesktopScene({
     <div className="canvas-shell" ref={canvasShellRef}>
       <Canvas
         camera={{ position: [3.1, 1.7, 3.7], fov: 45 }}
-        shadows
+        shadows={deskLite ? false : true}
         dpr={1}
         style={{ display: "block", width: "100%", height: "100%" }}
-        gl={{ toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.02 }}
+        gl={{
+          toneMapping: ACESFilmicToneMapping,
+          toneMappingExposure: 1.02,
+          powerPreference: deskLite ? "low-power" : "high-performance",
+        }}
       >
-        <FrutigerRoomBackdrop />
+        <FrutigerRoomBackdrop dense={!deskLite} />
         <fog attach="fog" args={["#eef1f7", 22, 58]} />
         <OrbitControls
           target={cameraTarget}
@@ -448,50 +516,55 @@ function DesktopScene({
           minPolarAngle={0.72}
           maxPolarAngle={1.34}
         />
-        <Environment preset="studio" environmentIntensity={0.38} background={false} />
-        <hemisphereLight intensity={0.48} color="#f3f8ff" groundColor="#e8f0eb" />
-        <ambientLight intensity={0.24} color="#f2f7fc" />
+        {!deskLite ? <Environment preset="studio" environmentIntensity={0.38} background={false} /> : null}
+        <hemisphereLight
+          intensity={deskLite ? 0.62 : 0.48}
+          color="#f3f8ff"
+          groundColor="#e8f0eb"
+        />
+        <ambientLight intensity={deskLite ? 0.42 : 0.24} color="#f2f7fc" />
         <directionalLight
           position={[-3.0, 6.2, 4.2]}
-          intensity={0.74}
+          intensity={deskLite ? 1.06 : 0.74}
           color="#fffcf8"
-          castShadow
-          shadow-mapSize={[2048, 2048]}
+          castShadow={deskLite ? false : true}
+          shadow-mapSize={deskLite ? [512, 512] : ([2048, 2048] as const)}
           shadow-camera-left={-5}
           shadow-camera-right={5}
           shadow-camera-top={5}
           shadow-camera-bottom={-5}
         />
-        <rectAreaLight position={[0.12, 3.42, 1.75]} width={6.0} height={3.2} intensity={0.72} color="#f4f9ff" />
+        {!deskLite ? (
+          <rectAreaLight position={[0.12, 3.42, 1.75]} width={6.0} height={3.2} intensity={0.72} color="#f4f9ff" />
+        ) : null}
 
-        <Desk />
+        <Desk lite={deskLite} />
 
-        <Suspense fallback={null}>
-          <group>
-            <Computer
-              transform={layout.computer}
-              isActive={hoverTarget === "computer"}
-              onClick={() => {
-                playWin7NavigationClick();
-                onEnterRetro();
-              }}
-              onHoverChange={(isHovering) => setHoverTarget(isHovering ? "computer" : null)}
-            />
-            <CdPlayer
-              transform={layout.cd}
-              isActive={hoverTarget === "cd"}
-              onClick={onOpenMusicPlayer}
-              onHoverChange={(isHovering) => setHoverTarget(isHovering ? "cd" : null)}
-            />
-            <Aquarium
-              transform={layout.plant}
-              isActive={hoverTarget === "aquarium"}
-              onHoverChange={(isHovering) => setHoverTarget(isHovering ? "aquarium" : null)}
-            />
-          </group>
-        </Suspense>
+        <group>
+          <Computer
+            transform={layout.computer}
+            isActive={hoverTarget === "computer"}
+            onClick={() => {
+              playWin7NavigationClick();
+              onEnterRetro();
+            }}
+            onHoverChange={(isHovering) => setHoverTarget(isHovering ? "computer" : null)}
+          />
+          <CdPlayer
+            transform={layout.cd}
+            isActive={hoverTarget === "cd"}
+            onClick={onOpenMusicPlayer}
+            onHoverChange={(isHovering) => setHoverTarget(isHovering ? "cd" : null)}
+          />
+          <Aquarium
+            transform={layout.plant}
+            isActive={hoverTarget === "aquarium"}
+            onHoverChange={(isHovering) => setHoverTarget(isHovering ? "aquarium" : null)}
+            modelReady={aquariumModelReady}
+          />
+        </group>
 
-        <ContactShadows opacity={0.14} scale={7.5} blur={5} far={5} position={[0, -1.02, 0]} />
+        {!deskLite ? <ContactShadows opacity={0.14} scale={7.5} blur={5} far={5} position={[0, -1.02, 0]} /> : null}
       </Canvas>
 
       <DesktopAssetLoadingOverlay />
