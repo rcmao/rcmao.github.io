@@ -349,7 +349,7 @@ function Aquarium({
 }
 
 /** Tracks drei/three queued loads so large GLBs stay behind a readable overlay until done (or stalled). */
-function DesktopAssetLoadingOverlay() {
+function DesktopAssetLoadingOverlay({ lite }: { lite?: boolean }) {
   const { active, progress, errors } = useProgress();
   const [mounted, setMounted] = useState(false);
 
@@ -382,7 +382,7 @@ function DesktopAssetLoadingOverlay() {
 
   return (
     <div
-      className={`desktop-scene-loading${active ? "" : " desktop-scene-loading--leaving"}`}
+      className={`desktop-scene-loading${active ? "" : " desktop-scene-loading--leaving"}${lite ? " desktop-scene-loading--desk-lite" : ""}`}
       aria-busy={active}
       aria-live="polite"
     >
@@ -567,7 +567,7 @@ function DesktopScene({
         {!deskLite ? <ContactShadows opacity={0.14} scale={7.5} blur={5} far={5} position={[0, -1.02, 0]} /> : null}
       </Canvas>
 
-      <DesktopAssetLoadingOverlay />
+      <DesktopAssetLoadingOverlay lite={deskLite} />
 
       <div className="begin-hint is-ready">Drag to rotate · Scroll to zoom</div>
     </div>

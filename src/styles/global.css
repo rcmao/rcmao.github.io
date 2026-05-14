@@ -781,6 +781,10 @@ a:hover {
   color: #991b1b;
 }
 
+.desktop-scene-loading--desk-lite {
+  background: rgba(243, 241, 236, 0.72);
+}
+
 .visually-hidden-desk-audio {
   position: fixed;
   left: -9999px;
