@@ -83,13 +83,8 @@ const shibaLayout: TransformValue = {
 };
 
 const SHIBA_GLB_PATH = "/models/shiba_inu_texture_updated.glb";
-/**
- * Normalized max dimension. ~0.013 is invisible on desktop next to a 5u-wide desk;
- * one global “large” value reads huge on phones (viewport + perspective).
- */
-const SHIBA_TARGET_SIZE_DESKTOP = 0.068;
-/** Narrow / coarse-pointer layout: smaller dog so it stays pet-sized vs the desk. */
-const SHIBA_TARGET_SIZE_LITE = 0.03;
+/** Normalized max dimension in scene units (same on mobile and desktop). */
+const SHIBA_TARGET_SIZE = 0.013;
 
 function cloneItemTransform(value: TransformValue): TransformValue {
   return {
@@ -503,7 +498,6 @@ function ShibaModel({ targetSize }: { targetSize: number }) {
 }
 
 type ChaichaiDogProps = {
-  deskLite: boolean;
   isActive: boolean;
   onHoverChange: (hovering: boolean) => void;
 };
@@ -530,10 +524,9 @@ function highlightPetNamesInLine(line: string, lineKey: string): ReactNode {
   });
 }
 
-function ChaichaiDog({ deskLite, isActive, onHoverChange }: ChaichaiDogProps) {
+function ChaichaiDog({ isActive, onHoverChange }: ChaichaiDogProps) {
   const wagRef = useRef<Group>(null);
   const hoverSoundGateRef = useRef(false);
-  const shibaTarget = deskLite ? SHIBA_TARGET_SIZE_LITE : SHIBA_TARGET_SIZE_DESKTOP;
   const [isHovering, setIsHovering] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogPhase, setDialogPhase] = useState<"menu" | "response">("menu");
@@ -596,7 +589,7 @@ function ChaichaiDog({ deskLite, isActive, onHoverChange }: ChaichaiDogProps) {
         }}
       >
         <group ref={wagRef}>
-          <ShibaModel targetSize={shibaTarget} />
+          <ShibaModel targetSize={SHIBA_TARGET_SIZE} />
         </group>
         <Html position={[0, 0.28, 0]} center distanceFactor={8.4} style={{ pointerEvents: "none" }}>
           <div className="chaichai-hotspot-stack" style={{ pointerEvents: dialogOpen ? "auto" : "none" }}>
@@ -970,7 +963,6 @@ function DesktopScene({
           />
           {chaichaiModelReady ? (
             <ChaichaiDog
-              deskLite={deskLite}
               isActive={hoverTarget === "chaichai"}
               onHoverChange={(hovering) => setHoverTarget(hovering ? "chaichai" : null)}
             />
