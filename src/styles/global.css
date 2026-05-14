@@ -1229,6 +1229,93 @@ body:has(.stage-retro) {
   width: min(500px, 96vw);
 }
 
+/* Drei <Html> wrapper — cap width so the panel cannot spill past the viewport when centered */
+.chaichai-html-anchor {
+  max-width: min(100vw - 16px, 520px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px), ((pointer: coarse) and (max-width: 1100px)) {
+  .chaichai-html-anchor {
+    max-width: calc(100vw - max(14px, env(safe-area-inset-left) + env(safe-area-inset-right)));
+  }
+
+  .chaichai-hotspot-stack {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+    padding-inline: 2px;
+    box-sizing: border-box;
+  }
+
+  .chaichai-dialog {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(68dvh, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 108px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    margin-top: 4px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .chaichai-dialog-header {
+    padding: 8px 8px 8px 10px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .chaichai-dialog-title {
+    font-size: 0.72rem;
+    line-height: 1.25;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .chaichai-dialog-close {
+    width: 32px;
+    height: 22px;
+    font-size: 1.05rem;
+  }
+
+  .chaichai-dialog-intro {
+    margin: 12px 10px 14px;
+    font-size: 0.92rem;
+  }
+
+  .chaichai-dialog-options {
+    margin: 0 10px;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .chaichai-dialog-option {
+    padding: 10px 10px 10px 16px;
+    font-size: 0.86rem;
+  }
+
+  .chaichai-dialog-option::before {
+    left: 4px;
+    height: 50%;
+  }
+
+  .chaichai-dialog-response-block {
+    margin: 0 10px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .chaichai-dialog-response {
+    font-size: 0.92rem;
+  }
+
+  .chaichai-dialog-back {
+    padding: 9px 14px;
+    font-size: 0.84rem;
+  }
+}
+
 /* Chaichai (dog) & xiaojinzi (cat) — high-contrast accent in Chaichai UI */
 .pet-name {
   font-weight: 800;

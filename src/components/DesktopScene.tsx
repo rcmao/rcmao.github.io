@@ -513,6 +513,7 @@ function ShibaModel({ targetSize }: { targetSize: number }) {
 }
 
 type ChaichaiDogProps = {
+  deskLite: boolean;
   isActive: boolean;
   onHoverChange: (hovering: boolean) => void;
 };
@@ -539,7 +540,7 @@ function highlightPetNamesInLine(line: string, lineKey: string): ReactNode {
   });
 }
 
-function ChaichaiDog({ isActive, onHoverChange }: ChaichaiDogProps) {
+function ChaichaiDog({ deskLite, isActive, onHoverChange }: ChaichaiDogProps) {
   const wagRef = useRef<Group>(null);
   const hoverSoundGateRef = useRef(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -606,7 +607,13 @@ function ChaichaiDog({ isActive, onHoverChange }: ChaichaiDogProps) {
         <group ref={wagRef}>
           <ShibaModel targetSize={SHIBA_TARGET_SIZE} />
         </group>
-        <Html position={[0, 0.28, 0]} center distanceFactor={8.4} style={{ pointerEvents: "none" }}>
+        <Html
+          position={[0, 0.28, 0]}
+          center
+          distanceFactor={deskLite ? 4.15 : 8.4}
+          className="chaichai-html-anchor"
+          style={{ pointerEvents: "none" }}
+        >
           <div className="chaichai-hotspot-stack" style={{ pointerEvents: dialogOpen ? "auto" : "none" }}>
             <span className={`scene-hotspot-hint ${isActive ? "is-active" : ""}`}>
               {nameRevealed ? (
@@ -966,6 +973,7 @@ function DesktopScene({
             largeTapTarget={deskLite}
           />
           <ChaichaiDog
+            deskLite={deskLite}
             isActive={hoverTarget === "chaichai"}
             onHoverChange={(hovering) => setHoverTarget(hovering ? "chaichai" : null)}
           />
