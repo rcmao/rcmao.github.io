@@ -642,7 +642,8 @@ function ChaichaiDog({ deskLite, isActive, onHoverChange }: ChaichaiDogProps) {
               >
                 <div className="chaichai-dialog-header">
                   <span className="chaichai-dialog-title">
-                    Ruochen&apos;s lab · <span className="pet-name pet-name--chaichai">Chaichai</span>
+                    Bodyguard{" "}
+                    <span className="pet-name pet-name--chaichai">Chaichai</span>
                   </span>
                   <button
                     type="button"
