@@ -11,6 +11,7 @@ import { playWin7NavigationClick } from "../audio/win7Click";
 import { pickRandomAquariumLine } from "../data/aquariumBubbles";
 import { CHAICHAI_NAME_STORAGE_KEY, chaichaiDialog } from "../data/chaichaiDialog";
 import { publicAssetUrl } from "../lib/publicAssetUrl";
+import { SakuraGuestbook, SAKURA_GLB_PATH, SAKURA_MODEL_TARGET_SIZE } from "./SakuraGuestbook";
 
 function usePreferDeskLite(): boolean {
   const compute = (): boolean => {
@@ -43,11 +44,12 @@ function usePreferDeskLite(): boolean {
 type DesktopSceneProps = {
   onEnterRetro: () => void;
   onOpenMusicPlayer: () => void;
+  onOpenMessageTree: () => void;
   onOpenBook: () => void;
   onShowNote: () => void;
 };
 
-type HoverTarget = "aquarium" | "cd" | "chaichai" | "computer" | null;
+type HoverTarget = "aquarium" | "cd" | "chaichai" | "computer" | "messageTree" | null;
 type LayoutItem = "computer" | "cd" | "plant";
 type TransformValue = {
   position: [number, number, number];
@@ -163,10 +165,13 @@ function NormalizedModel({
   path,
   targetSize,
   rotation = [0, 0, 0],
+  meshesPickable = true,
 }: {
   path: string;
   targetSize: number;
   rotation?: [number, number, number];
+  /** When false, meshes do not participate in raycasting (use a separate invisible hit volume). */
+  meshesPickable?: boolean;
 }) {
   const { scene } = useGLTF(path, false, true);
 
@@ -174,8 +179,12 @@ function NormalizedModel({
     const model = scene.clone(true);
     model.traverse((object) => {
       if ("isMesh" in object) {
-        object.castShadow = true;
-        object.receiveShadow = true;
+        const mesh = object as Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        if (!meshesPickable) {
+          mesh.raycast = (): void => undefined;
+        }
       }
     });
 
@@ -200,7 +209,7 @@ function NormalizedModel({
     }
 
     return holder;
-  }, [scene, targetSize]);
+  }, [scene, targetSize, meshesPickable]);
 
   return (
     <group rotation={rotation}>
@@ -851,6 +860,9 @@ function Desk({ lite }: { lite: boolean }) {
 function DesktopScene({
   onEnterRetro,
   onOpenMusicPlayer,
+  onOpenMessageTree,
+  onOpenBook,
+  onShowNote,
 }: DesktopSceneProps) {
   const deskLite = usePreferDeskLite();
   const layout = useMemo(() => cloneSceneLayout(defaultLayout), []);
@@ -859,6 +871,7 @@ function DesktopScene({
 
   useEffect(() => {
     void useGLTF.preload(publicAssetUrl(SHIBA_GLB_PATH));
+    void useGLTF.preload(publicAssetUrl(SAKURA_GLB_PATH));
   }, []);
 
   useEffect(() => {
@@ -949,6 +962,20 @@ function DesktopScene({
         ) : null}
 
         <Desk lite={deskLite} />
+
+        <SakuraGuestbook
+          deskLite={deskLite}
+          isActive={hoverTarget === "messageTree"}
+          onHoverChange={(hovering) => setHoverTarget(hovering ? "messageTree" : null)}
+          onOpenPanel={onOpenMessageTree}
+        >
+          <NormalizedModel
+            path={publicAssetUrl(SAKURA_GLB_PATH)}
+            targetSize={SAKURA_MODEL_TARGET_SIZE}
+            rotation={[0, 0, 0]}
+            meshesPickable={false}
+          />
+        </SakuraGuestbook>
 
         <group>
           <Computer

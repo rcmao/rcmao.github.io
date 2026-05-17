@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BootSequence from "./components/BootSequence";
 import DeskMusicPanel from "./components/DeskMusicPanel";
+import MessageTreePanel from "./components/MessageTreePanel";
 import Preloader from "./components/Preloader";
 import StartScreen from "./components/StartScreen";
 import { DESK_PLAYLIST } from "./data/deskPlaylist";
@@ -16,6 +17,7 @@ function App() {
   const [stage, setStage] = useState<Stage>("start");
   const [modal, setModal] = useState<{ title: string; body: string } | null>(null);
   const [musicPanelOpen, setMusicPanelOpen] = useState(false);
+  const [messageTreeOpen, setMessageTreeOpen] = useState(false);
   const [deskMusicPlaying, setDeskMusicPlaying] = useState(false);
   const deskAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -120,6 +122,7 @@ function App() {
               <DesktopScene
                 onEnterRetro={() => setStage("retro")}
                 onOpenMusicPlayer={() => setMusicPanelOpen(true)}
+                onOpenMessageTree={() => setMessageTreeOpen(true)}
                 onOpenBook={() => showPublication(firstPublication)}
                 onShowNote={() => setModal({ title: "QQ Pet Memo", body: randomDeskNote })}
               />
@@ -147,6 +150,7 @@ function App() {
       </AnimatePresence>
 
       <DeskMusicPanel open={musicPanelOpen} onClose={() => setMusicPanelOpen(false)} audioRef={deskAudioRef} />
+      <MessageTreePanel open={messageTreeOpen} onClose={() => setMessageTreeOpen(false)} />
 
       <AnimatePresence>
         {modal && (
